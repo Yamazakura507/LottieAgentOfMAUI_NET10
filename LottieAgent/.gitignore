@@ -1,0 +1,62 @@
+# Build outputs
+**/bin/
+**/obj/
+**/out/
+**/publish/
+**/artifacts/
+
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.csproj.user
+*.vbproj.user
+
+# JetBrains Rider / ReSharper
+.idea/
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# Test and coverage results
+**/TestResults/
+**/coverage/
+*.coverage
+*.coveragexml
+coverage*.json
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.orig
+*.swp
+*.swo
+*~
+
+# Operating system files
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# MAUI / platform-generated files
+**/Generated/
+**/*.g.cs.tmp
+**/*.g.i.cs.tmp
+
+# Local environment files and secrets
+.env
+.env.*
+!.env.example
+secrets.json
