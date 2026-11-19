@@ -74,6 +74,9 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             1d,
             validateValue: (_, value) => value is double speed && speed > 0);
 
+    public static readonly BindableProperty IsReversedProperty =
+        BindableProperty.Create(nameof(IsReversed), typeof(bool), typeof(LottieView), false);
+
     public static readonly BindableProperty ProgressProperty =
         BindableProperty.Create(
             nameof(Progress),
@@ -140,6 +143,15 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
     }
 
     /// <summary>
+    /// Gets or sets whether the animation runs from the last frame to the first frame.
+    /// </summary>
+    public bool IsReversed
+    {
+        get => (bool)GetValue(IsReversedProperty);
+        set => SetValue(IsReversedProperty, value);
+    }
+
+    /// <summary>
     /// Normalized animation position in the range [0, 1].
     /// </summary>
     public double Progress
@@ -149,6 +161,12 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
     }
 
     public event EventHandler? AnimationLoaded;
+
+    /// <summary>
+    /// Raised when a non-looping animation reaches its final frame.
+    /// </summary>
+    public event EventHandler? AnimationCompleted;
+
     public event Action<Exception>? AnimationFailed;
 
     /// <summary>
@@ -179,7 +197,15 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
 
     public void Play()
     {
-        if (Progress >= 1) Progress = 0;
+        if (IsReversed)
+        {
+            if (Progress <= 0)
+                Progress = 1;
+        }
+        else if (Progress >= 1)
+        {
+            Progress = 0;
+        }
 
         IsPlaying = true;
     }
@@ -325,11 +351,12 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             return false;
         }
 
-        double nextProgress = Progress + (stopwatch.Elapsed.TotalSeconds * Speed / duration);
+        double progressDelta = stopwatch.Elapsed.TotalSeconds * Speed / duration;
+        double nextProgress = Progress + (IsReversed ? -progressDelta : progressDelta);
 
         stopwatch.Restart();
 
-        if (nextProgress >= 1)
+        if (!IsReversed && nextProgress >= 1)
         {
             if (IsLooping)
             {
@@ -340,6 +367,26 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
                 Progress = 1;
                 IsPlaying = false;
                 isTimerRunning = false;
+
+                AnimationCompleted?.Invoke(this, EventArgs.Empty);
+
+                return false;
+            }
+        }
+        else if (IsReversed && nextProgress <= 0)
+        {
+            if (IsLooping)
+            {
+                double wrappedProgress = Math.Abs(nextProgress) % 1;
+                nextProgress = wrappedProgress < double.Epsilon ? 1 : 1 - wrappedProgress;
+            }
+            else
+            {
+                Progress = 0;
+                IsPlaying = false;
+                isTimerRunning = false;
+
+                AnimationCompleted?.Invoke(this, EventArgs.Empty);
 
                 return false;
             }
@@ -361,12 +408,30 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
     private void OnPaintSurface(object? sender, SKPaintSurfaceEventArgs e)
     {
         SKCanvas canvas = e.Surface.Canvas;
-        canvas.Clear();
+
+        canvas.Clear(ToSkColor(BackgroundColor));
 
         if (animation is null) return;
 
         SKRect destination = new(0, 0, e.Info.Width, e.Info.Height);
         animation.Render(canvas, destination);
+    }
+
+    private static SKColor ToSkColor(Color? color)
+    {
+        if (color is null) return SKColors.Transparent;
+
+        static byte Channel(double value) => (byte)Math.Clamp(Math.Round(value * 255), 0, 255);
+
+        return new SKColor(Channel(color.Red), Channel(color.Green), Channel(color.Blue), Channel(color.Alpha));
+    }
+
+    protected override void OnPropertyChanged(string? propertyName = null)
+    {
+        base.OnPropertyChanged(propertyName);
+
+        if (propertyName == nameof(BackgroundColor))
+            InvalidateSurface();
     }
 
     private void OnUnloaded(object? sender, EventArgs e) => IsPlaying = false;
