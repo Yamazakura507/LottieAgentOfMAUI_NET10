@@ -430,8 +430,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
     {
         base.OnPropertyChanged(propertyName);
 
-        if (propertyName == nameof(BackgroundColor))
-            InvalidateSurface();
+        if (propertyName == nameof(BackgroundColor)) InvalidateSurface();
     }
 
     private void OnUnloaded(object? sender, EventArgs e) => IsPlaying = false;
