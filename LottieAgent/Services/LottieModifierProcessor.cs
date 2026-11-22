@@ -17,13 +17,15 @@ public sealed class LottieModifierProcessor : ILottieModifierProcessor
 {
     private readonly IReadOnlyDictionary<Type, ILottieModifierHandler> handlers;
 
+    /// <summary>
+    /// Initializes the processor with its registered modifier handlers.
+    /// </summary>
+    /// <param name="handlers">Handlers keyed by their supported payload type.</param>
     public LottieModifierProcessor(IEnumerable<ILottieModifierHandler> handlers)
     {
         ArgumentNullException.ThrowIfNull(handlers);
 
-        this.handlers = handlers
-            .GroupBy(handler => handler.ValueType)
-            .ToDictionary(group => group.Key, group => group.Last());
+        this.handlers = handlers.GroupBy(handler => handler.ValueType).ToDictionary(group => group.Key, group => group.Last());
     }
 
     /// <summary>
@@ -43,6 +45,7 @@ public sealed class LottieModifierProcessor : ILottieModifierProcessor
         return new LottieModifierProcessor(handlers);
     }
 
+    /// <inheritdoc />
     public LottieModifierResult Apply(string sourceJson, IEnumerable<LottieModifier> modifiers)
     {
         ArgumentNullException.ThrowIfNull(sourceJson);

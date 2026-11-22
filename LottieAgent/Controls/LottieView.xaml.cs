@@ -23,6 +23,9 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
     private bool isTimerRunning;
     private int loadVersion;
 
+    /// <summary>
+    /// Bindable property for <see cref="Source"/>.
+    /// </summary>
     public static readonly BindableProperty SourceProperty =
         BindableProperty.Create(
             nameof(Source),
@@ -31,6 +34,9 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             default(string),
             propertyChanged: (bindable, _, value) => ((LottieView)bindable).LoadSourceAsync((string?)value));
 
+    /// <summary>
+    /// Bindable property for <see cref="Modifiers"/>.
+    /// </summary>
     public static readonly BindableProperty ModifiersProperty =
         BindableProperty.Create(
             nameof(Modifiers),
@@ -39,6 +45,9 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             default(LottieModifierCollection),
             propertyChanged: OnModifiersChanged);
 
+    /// <summary>
+    /// Bindable property for <see cref="JsonLoader"/>.
+    /// </summary>
     public static readonly BindableProperty JsonLoaderProperty =
         BindableProperty.Create(
             nameof(JsonLoader),
@@ -47,6 +56,9 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             default(ILottieJsonLoader),
             propertyChanged: OnJsonLoaderChanged);
 
+    /// <summary>
+    /// Bindable property for <see cref="ModifierProcessor"/>.
+    /// </summary>
     public static readonly BindableProperty ModifierProcessorProperty =
         BindableProperty.Create(
             nameof(ModifierProcessor),
@@ -55,6 +67,9 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             default(ILottieModifierProcessor),
             propertyChanged: OnModifierProcessorChanged);
 
+    /// <summary>
+    /// Bindable property for <see cref="IsPlaying"/>.
+    /// </summary>
     public static readonly BindableProperty IsPlayingProperty =
         BindableProperty.Create(
             nameof(IsPlaying),
@@ -63,9 +78,15 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             false,
             propertyChanged: (bindable, _, value) => ((LottieView)bindable).UpdatePlayback((bool)value));
 
+    /// <summary>
+    /// Bindable property for <see cref="IsLooping"/>.
+    /// </summary>
     public static readonly BindableProperty IsLoopingProperty =
         BindableProperty.Create(nameof(IsLooping), typeof(bool), typeof(LottieView), true);
 
+    /// <summary>
+    /// Bindable property for <see cref="Speed"/>.
+    /// </summary>
     public static readonly BindableProperty SpeedProperty =
         BindableProperty.Create(
             nameof(Speed),
@@ -74,9 +95,15 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             1d,
             validateValue: (_, value) => value is double speed && speed > 0);
 
+    /// <summary>
+    /// Bindable property for <see cref="IsReversed"/>.
+    /// </summary>
     public static readonly BindableProperty IsReversedProperty =
         BindableProperty.Create(nameof(IsReversed), typeof(bool), typeof(LottieView), false);
 
+    /// <summary>
+    /// Bindable property for <see cref="Progress"/>.
+    /// </summary>
     public static readonly BindableProperty ProgressProperty =
         BindableProperty.Create(
             nameof(Progress),
@@ -87,6 +114,9 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             validateValue: (_, value) => value is double progress && progress >= 0 && progress <= 1,
             propertyChanged: (bindable, _, value) => ((LottieView)bindable).Seek((double)value));
 
+    /// <summary>
+    /// Gets or sets the asset path or supported source identifier for the animation.
+    /// </summary>
     public string? Source
     {
         get => (string?)GetValue(SourceProperty);
@@ -121,12 +151,18 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         set => SetValue(ModifierProcessorProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether the animation is currently playing.
+    /// </summary>
     public bool IsPlaying
     {
         get => (bool)GetValue(IsPlayingProperty);
         set => SetValue(IsPlayingProperty, value);
     }
 
+    /// <summary>
+    /// Gets or sets whether playback repeats when an edge is reached.
+    /// </summary>
     public bool IsLooping
     {
         get => (bool)GetValue(IsLoopingProperty);
@@ -160,6 +196,9 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         set => SetValue(ProgressProperty, value);
     }
 
+    /// <summary>
+    /// Raised after the animation JSON has been loaded and parsed successfully.
+    /// </summary>
     public event EventHandler? AnimationLoaded;
 
     /// <summary>
@@ -167,6 +206,9 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
     /// </summary>
     public event EventHandler? AnimationCompleted;
 
+    /// <summary>
+    /// Raised when loading, modifying or parsing the animation fails.
+    /// </summary>
     public event Action<Exception>? AnimationFailed;
 
     /// <summary>
@@ -183,6 +225,11 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
 
     }
 
+    /// <summary>
+    /// Initializes the view with explicit animation loading and modifier services.
+    /// </summary>
+    /// <param name="jsonLoader">Service used to load the animation JSON.</param>
+    /// <param name="modifierProcessor">Service used to apply named modifiers.</param>
     public LottieView(ILottieJsonLoader jsonLoader, ILottieModifierProcessor modifierProcessor)
     {
         this.jsonLoader = jsonLoader ?? throw new ArgumentNullException(nameof(jsonLoader));
@@ -195,12 +242,14 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         InitializeComponent();
     }
 
+    /// <summary>
+    /// Starts or resumes playback, restarting from the appropriate edge when necessary.
+    /// </summary>
     public void Play()
     {
         if (IsReversed)
         {
-            if (Progress <= 0)
-                Progress = 1;
+            if (Progress <= 0) Progress = 1;
         }
         else if (Progress >= 1)
         {
@@ -210,8 +259,14 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         IsPlaying = true;
     }
 
+    /// <summary>
+    /// Pauses playback while preserving the current progress.
+    /// </summary>
     public void Pause() => IsPlaying = false;
 
+    /// <summary>
+    /// Stops playback and resets progress to the first frame.
+    /// </summary>
     public void Stop()
     {
         IsPlaying = false;
@@ -255,7 +310,6 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
 
         animation = null;
         sourceJson = null;
-        Progress = 0;
 
         InvalidateSurface();
 
@@ -290,7 +344,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
                 ModifierNotApplied?.Invoke(targetName);
             }
 
-            using MemoryStream stream = new (Encoding.UTF8.GetBytes(result.Json));
+            using MemoryStream stream = new(Encoding.UTF8.GetBytes(result.Json));
             LottieAnimation? rebuiltAnimation = LottieAnimation.Create(stream);
 
             if (rebuiltAnimation is null) throw new InvalidDataException("Skottie could not create an animation from the modified JSON.");
@@ -402,6 +456,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         if (animation is null) return;
 
         animation.Seek(progress);
+
         InvalidateSurface();
     }
 
@@ -414,6 +469,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         if (animation is null) return;
 
         SKRect destination = new(0, 0, e.Info.Width, e.Info.Height);
+
         animation.Render(canvas, destination);
     }
 
@@ -426,6 +482,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         return new SKColor(Channel(color.Red), Channel(color.Green), Channel(color.Blue), Channel(color.Alpha));
     }
 
+    /// <inheritdoc />
     protected override void OnPropertyChanged(string? propertyName = null)
     {
         base.OnPropertyChanged(propertyName);

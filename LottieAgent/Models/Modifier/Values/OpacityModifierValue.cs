@@ -1,6 +1,6 @@
 ﻿using LottieAgent.Enums;
 
-namespace LottieAgent.Models.Modifier
+namespace LottieAgent.Models.Modifier.Values
 {
     /// <summary>
     /// Typed payload for opacity changes. Set replaces the value; Multiply

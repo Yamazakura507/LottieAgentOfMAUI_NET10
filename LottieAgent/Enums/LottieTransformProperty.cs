@@ -5,7 +5,13 @@
     /// </summary>
     public enum LottieTransformProperty
     {
+        /// <summary>
+        /// Changes the X/Y position of the target.
+        /// </summary>
         Position,
+        /// <summary>
+        /// Changes the X/Y scale of the target.
+        /// </summary>
         Scale
     }
 }

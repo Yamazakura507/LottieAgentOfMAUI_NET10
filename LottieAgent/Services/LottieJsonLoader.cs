@@ -8,6 +8,7 @@ namespace LottieAgent.Services;
 /// </summary>
 public sealed class MauiLottieJsonLoader : ILottieJsonLoader
 {
+    /// <inheritdoc />
     public async ValueTask<string> LoadAsync(string assetPath, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(assetPath)) throw new ArgumentException("An asset path is required.", nameof(assetPath));

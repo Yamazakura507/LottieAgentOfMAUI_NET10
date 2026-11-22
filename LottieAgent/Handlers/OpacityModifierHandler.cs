@@ -1,7 +1,7 @@
 ﻿using LottieAgent.Enums;
 using LottieAgent.Extensions;
 using LottieAgent.Handlers.Abstract;
-using LottieAgent.Models.Modifier;
+using LottieAgent.Models.Modifier.Values;
 using System.Text.Json.Nodes;
 
 namespace LottieAgent.Handlers
@@ -11,6 +11,7 @@ namespace LottieAgent.Handlers
     /// </summary>
     public sealed class OpacityModifierHandler : LottieModifierHandler<OpacityModifierValue>
     {
+        /// <inheritdoc />
         protected override bool Apply(JsonObject target, OpacityModifierValue value) => value.Operation switch
         {
             LottieModifierOperation.Set => target.SetOpacity(value.Value),

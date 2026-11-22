@@ -1,7 +1,7 @@
 ﻿using LottieAgent.Enums;
 using LottieAgent.Extensions;
 using LottieAgent.Handlers.Abstract;
-using LottieAgent.Models.Modifier;
+using LottieAgent.Models.Modifier.Values;
 using System.Text.Json.Nodes;
 
 namespace LottieAgent.Handlers
@@ -11,6 +11,7 @@ namespace LottieAgent.Handlers
     /// </summary>
     public sealed class RotationModifierHandler : LottieModifierHandler<RotationModifierValue>
     {
+        /// <inheritdoc />
         protected override bool Apply(JsonObject target, RotationModifierValue value) => value.Operation switch
         {
             LottieModifierOperation.Set => target.SetRotation(value.Degrees),

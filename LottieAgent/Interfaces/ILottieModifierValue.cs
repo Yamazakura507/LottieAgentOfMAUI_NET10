@@ -7,5 +7,8 @@ namespace LottieAgent.Interfaces;
 /// </summary>
 public interface ILottieModifierValue<out TValue> : ILottieModifierValue
 {
+    /// <summary>
+    /// Gets the strongly typed value carried by the modifier.
+    /// </summary>
     TValue Value { get; }
 }

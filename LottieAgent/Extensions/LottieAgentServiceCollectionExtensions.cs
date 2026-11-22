@@ -12,6 +12,11 @@ namespace LottieAgent.Extensions;
 /// </summary>
 public static class LottieAgentServiceCollectionExtensions
 {
+    /// <summary>
+    /// Registers the Lottie loader, modifier processor, handlers and view factory.
+    /// </summary>
+    /// <param name="services">The service collection to update.</param>
+    /// <returns>The same collection so registration can be chained.</returns>
     public static IServiceCollection AddLottieAgent(this IServiceCollection services)
     {
         ArgumentNullException.ThrowIfNull(services);

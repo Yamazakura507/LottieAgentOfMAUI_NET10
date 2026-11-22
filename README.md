@@ -181,6 +181,62 @@ The collection provides the following operations:
 
 The collection is observable. Adding, removing, or changing its contents triggers reprocessing of the original JSON and recreation of the animation. The original JSON is retained separately, so applying modifiers again does not accumulate changes on top of a previously modified version.
 
+### Declaring modifiers in XAML
+
+Every built-in operation can also be represented by a typed XAML element. Set `TargetName` to the Lottie layer/shape `nm` value. The same collection is used by the C# fluent API and by XAML:
+
+~~~xml
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:lottie="clr-namespace:LottieAgent.Controls;assembly=LottieAgent"
+    xmlns:models="clr-namespace:LottieAgent.Models;assembly=LottieAgent">
+
+    <lottie:LottieView Source="Animations/loading.json" IsPlaying="True">
+        <lottie:LottieView.Modifiers>
+            <models:LottieModifierCollection>
+                <models:LottieColorModifier
+                    TargetName="AccentShape"
+                    Color="#FF5A36" />
+                <models:LottieTextModifier
+                    TargetName="Title"
+                    Text="Hello, MAUI!" />
+                <models:LottieOpacityModifier
+                    TargetName="Shadow"
+                    Opacity="0.5"
+                    Operation="Multiply" />
+                <models:LottieTransformModifier
+                    TargetName="Icon"
+                    Property="Position"
+                    Operation="Offset"
+                    Vector="10,-5" />
+                <models:LottieTransformModifier
+                    TargetName="Icon"
+                    Property="Scale"
+                    Operation="Set"
+                    Vector="1.2,1.2" />
+                <models:LottieRotationModifier
+                    TargetName="Icon"
+                    Degrees="45"
+                    Operation="Set" />
+            </models:LottieModifierCollection>
+        </lottie:LottieView.Modifiers>
+    </lottie:LottieView>
+</ContentPage>
+~~~
+
+Available XAML elements:
+
+| Element | Properties | Supported operations |
+|---|---|---|
+| `LottieColorModifier` | `TargetName`, `Color` | Replace color |
+| `LottieTextModifier` | `TargetName`, `Text` | Replace text |
+| `LottieOpacityModifier` | `TargetName`, `Opacity`, `Operation` | `Set`, `Multiply` |
+| `LottieTransformModifier` | `TargetName`, `Property`, `Operation`, `Vector` | Position: `Set` / `Offset`; Scale: `Set` / `Multiply` |
+| `LottieRotationModifier` | `TargetName`, `Degrees`, `Operation` | `Set`, `Offset` |
+
+The scale vector is expressed as a multiplier: `1,1` preserves the original size and `1.2,1.2` scales both axes to 120%. Transform vectors use X/Y coordinates.
+
 ## Events
 
 **LottieView** exposes events for monitoring animation loading and modifier application:

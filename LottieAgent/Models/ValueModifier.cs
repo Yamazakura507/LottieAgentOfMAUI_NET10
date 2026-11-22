@@ -7,5 +7,6 @@ namespace LottieAgent.Models;
 /// </summary>
 public sealed record ValueModifier<TValue>(TValue Value) : ILottieModifierValue<TValue>
 {
+    /// <inheritdoc />
     public Type ValueType => typeof(TValue);
 }

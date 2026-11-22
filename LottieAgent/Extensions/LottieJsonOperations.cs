@@ -8,6 +8,13 @@ namespace LottieAgent.Extensions;
 /// </summary>
 internal static class LottieJsonOperations
 {
+    /// <summary>
+    /// Replaces the color of every fill and stroke in the target Lottie element.
+    /// Animated color keyframes are updated as well.
+    /// </summary>
+    /// <param name="target">The Lottie JSON element whose fill and stroke colors are changed.</param>
+    /// <param name="color">The replacement color. Its alpha value is also applied to the element opacity.</param>
+    /// <returns><see langword="true"/> if at least one fill or stroke was found and updated; otherwise, <see langword="false"/>.</returns>
     public static bool ReplaceColor(this JsonObject target, Color color)
     {
         bool applied = false;
@@ -28,6 +35,12 @@ internal static class LottieJsonOperations
         return applied;
     }
 
+    /// <summary>
+    /// Replaces the text document value in all text keyframes belonging to the target Lottie element.
+    /// </summary>
+    /// <param name="target">The Lottie text element whose text keyframes are updated.</param>
+    /// <param name="text">The replacement text.</param>
+    /// <returns><see langword="true"/> if at least one text document was updated; otherwise, <see langword="false"/>.</returns>
     public static bool ReplaceText(this JsonObject target, string text)
     {
         if (target["t"]?["d"]?["k"] is not JsonArray keyframes) return false;
@@ -43,6 +56,13 @@ internal static class LottieJsonOperations
         return applied;
     }
 
+    /// <summary>
+    /// Sets the opacity of the target fill or stroke to a constant value.
+    /// The supplied normalized opacity is converted to the percentage scale used by Lottie.
+    /// </summary>
+    /// <param name="target">The Lottie fill or stroke element whose opacity is changed.</param>
+    /// <param name="opacity">The normalized opacity value, where zero is transparent and one is fully opaque.</param>
+    /// <returns><see langword="true"/> if an opacity property was found and updated; otherwise, <see langword="false"/>.</returns>
     public static bool SetOpacity(this JsonObject target, double opacity)
     {
         JsonObject? owner = target.GetOpacityOwner();
@@ -54,9 +74,23 @@ internal static class LottieJsonOperations
         return true;
     }
 
+    /// <summary>
+    /// Multiplies all numeric values in the target fill or stroke opacity property by the specified factor.
+    /// Animated opacity keyframes are handled individually.
+    /// </summary>
+    /// <param name="target">The Lottie fill or stroke element whose opacity is scaled.</param>
+    /// <param name="factor">The multiplier applied to each opacity value.</param>
+    /// <returns><see langword="true"/> if an opacity property was found and updated; otherwise, <see langword="false"/>.</returns>
     public static bool MultiplyOpacity(this JsonObject target, double factor) => 
         target.GetOpacityOwner()?.MapProperty("o", node => node.MapNumericValues(value => value * factor)) ?? false;
 
+    /// <summary>
+    /// Sets the target transform position to the specified constant two-dimensional position.
+    /// Separated-dimension position properties are updated through their X and Y components.
+    /// </summary>
+    /// <param name="target">The Lottie element or group containing the transform to update.</param>
+    /// <param name="positionValue">The replacement position in Lottie composition coordinates.</param>
+    /// <returns><see langword="true"/> if a transform was found and updated; otherwise, <see langword="false"/>.</returns>
     public static bool SetPosition(this JsonObject target, Point positionValue)
     {
         JsonObject? transform = target.GetTransform();
@@ -78,6 +112,13 @@ internal static class LottieJsonOperations
         return true;
     }
 
+    /// <summary>
+    /// Adds the specified offset to the target transform position.
+    /// The offset is applied to static values and to each animated position keyframe.
+    /// </summary>
+    /// <param name="target">The Lottie element or group containing the transform to update.</param>
+    /// <param name="offset">The horizontal and vertical position offsets.</param>
+    /// <returns><see langword="true"/> if a position value was found and updated; otherwise, <see langword="false"/>.</returns>
     public static bool OffsetPosition(this JsonObject target, Point offset)
     {
         JsonObject? transform = target.GetTransform();
@@ -94,6 +135,13 @@ internal static class LottieJsonOperations
         return transform.MapProperty("p", node => node.MapVectorValues((value, index) => value + (index == 0 ? offset.X : offset.Y)));
     }
 
+    /// <summary>
+    /// Sets the target transform scale to the specified constant X and Y percentages.
+    /// The unit scale value is converted to Lottie's percentage representation.
+    /// </summary>
+    /// <param name="target">The Lottie element or group containing the transform to update.</param>
+    /// <param name="scale">The horizontal and vertical scale factors, where one represents 100 percent.</param>
+    /// <returns><see langword="true"/> if a transform was found and updated; otherwise, <see langword="false"/>.</returns>
     public static bool SetScale(this JsonObject target, Point scale)
     {
         JsonObject? transform = target.GetTransform();
@@ -105,9 +153,22 @@ internal static class LottieJsonOperations
         return true;
     }
 
+    /// <summary>
+    /// Multiplies the target transform scale by the specified horizontal and vertical factors.
+    /// Static values and animated scale keyframes are supported.
+    /// </summary>
+    /// <param name="target">The Lottie element or group containing the transform to update.</param>
+    /// <param name="factor">The horizontal and vertical scale multipliers.</param>
+    /// <returns><see langword="true"/> if a scale property was found and updated; otherwise, <see langword="false"/>.</returns>
     public static bool MultiplyScale(this JsonObject target, Point factor) =>
         target.GetTransform()?.MapProperty("s", node => node.MapVectorValues((value, index) => value * (index == 0 ? factor.X : factor.Y))) ?? false;
 
+    /// <summary>
+    /// Sets the target transform rotation to the specified constant angle.
+    /// </summary>
+    /// <param name="target">The Lottie element or group containing the transform to update.</param>
+    /// <param name="degrees">The replacement rotation angle in degrees.</param>
+    /// <returns><see langword="true"/> if a transform was found and updated; otherwise, <see langword="false"/>.</returns>
     public static bool SetRotation(this JsonObject target, double degrees)
     {
         JsonObject? transform = target.GetTransform();
@@ -119,6 +180,13 @@ internal static class LottieJsonOperations
         return true;
     }
 
+    /// <summary>
+    /// Adds the specified angle to the target transform rotation.
+    /// The offset is applied to static values and to each animated rotation keyframe.
+    /// </summary>
+    /// <param name="target">The Lottie element or group containing the transform to update.</param>
+    /// <param name="degrees">The rotation offset in degrees.</param>
+    /// <returns><see langword="true"/> if a rotation property was found and updated; otherwise, <see langword="false"/>.</returns>
     public static bool OffsetRotation(this JsonObject target, double degrees) => 
         target.GetTransform()?.MapProperty("r", node => node.MapNumericValues(value => value + degrees)) ?? false;
 

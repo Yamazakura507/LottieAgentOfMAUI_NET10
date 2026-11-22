@@ -10,6 +10,7 @@ namespace LottieAgent.Handlers;
 /// </summary>
 public sealed class ValueTypeModifierHandler<TValue> : LottieModifierHandler<TValue>
 {
+    /// <inheritdoc />
     protected override bool Apply(JsonObject target, TValue value) => value switch
     {
         Color => target.ReplaceColor(Unsafe.As<TValue, Color>(ref value)),
