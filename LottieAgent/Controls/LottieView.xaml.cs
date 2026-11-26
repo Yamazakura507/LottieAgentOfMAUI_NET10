@@ -6,6 +6,7 @@ using SkiaSharp.Views.Maui;
 using LottieAgent.Models;
 using LottieAgent.Interfaces;
 using LottieAgent.Services;
+using SkiaSharp.Views.Maui.Controls;
 
 namespace LottieAgent.Controls;
 
@@ -13,7 +14,7 @@ namespace LottieAgent.Controls;
 /// Displays a Lottie JSON animation using SkiaSharp.Skottie.
 /// Modifiers are applied to a copy of the JSON before the animation is created.
 /// </summary>
-public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
+public partial class LottieView : SKCanvasView
 {
     private readonly Stopwatch stopwatch = new();
     private ILottieJsonLoader jsonLoader;
@@ -21,6 +22,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
     private LottieAnimation? animation;
     private string? sourceJson;
     private bool isTimerRunning;
+    private bool isUpdatingInput;
     private int loadVersion;
 
     /// <summary>
@@ -32,7 +34,18 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             typeof(string),
             typeof(LottieView),
             default(string),
-            propertyChanged: (bindable, _, value) => ((LottieView)bindable).LoadSourceAsync((string?)value));
+            propertyChanged: OnSourceChanged);
+
+    /// <summary>
+    /// Bindable property for <see cref="Json"/>.
+    /// </summary>
+    public static readonly BindableProperty JsonProperty =
+        BindableProperty.Create(
+            nameof(Json),
+            typeof(string),
+            typeof(LottieView),
+            default(string),
+            propertyChanged: OnJsonChanged);
 
     /// <summary>
     /// Bindable property for <see cref="Modifiers"/>.
@@ -122,6 +135,21 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         get => (string?)GetValue(SourceProperty);
         set => SetValue(SourceProperty, value);
     }
+
+    /// <summary>
+    /// Gets or sets the raw Lottie JSON document. This bypasses the asset loader.
+    /// Setting either Source or Json clears the other input.
+    /// </summary>
+    public string? Json
+    {
+        get => (string?)GetValue(JsonProperty);
+        set => SetValue(JsonProperty, value);
+    }
+
+    /// <summary>
+    /// Gets the original JSON document before modifiers are applied.
+    /// </summary>
+    public string? SourceJson => sourceJson;
 
     /// <summary>
     /// Named overrides applied to the source JSON before Skottie loads it.
@@ -273,6 +301,38 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         Progress = 0;
     }
 
+    private static void OnSourceChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        LottieView view = (LottieView)bindable;
+
+        view.UpdateInput(JsonProperty, () => view.LoadSourceAsync((string?)newValue));
+    }
+
+    private static void OnJsonChanged(BindableObject bindable, object oldValue, object newValue)
+    {
+        LottieView view = (LottieView)bindable;
+
+        view.UpdateInput(SourceProperty, () => view.LoadJson((string?)newValue));
+    }
+
+    private void UpdateInput(BindableProperty propertyToClear, Action loadAction)
+    {
+        if (isUpdatingInput) return;
+
+        isUpdatingInput = true;
+
+        try
+        {
+            if (GetValue(propertyToClear) is not null) SetValue(propertyToClear, null);
+        }
+        finally
+        {
+            isUpdatingInput = false;
+        }
+
+        loadAction();
+    }
+
     private static void OnModifiersChanged(BindableObject bindable, object oldValue, object newValue)
     {
         LottieView view = (LottieView)bindable;
@@ -311,6 +371,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
         animation = null;
         sourceJson = null;
 
+        OnPropertyChanged(nameof(SourceJson));
         InvalidateSurface();
 
         if (string.IsNullOrWhiteSpace(source)) return;
@@ -323,12 +384,34 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
 
             sourceJson = json;
 
+            OnPropertyChanged(nameof(SourceJson));
             RebuildAnimation();
         }
         catch (Exception exception)
         {
             if (version == loadVersion) AnimationFailed?.Invoke(exception);
         }
+    }
+
+    private void LoadJson(string? json)
+    {
+        Interlocked.Increment(ref loadVersion);
+
+        stopwatch.Stop();
+        animation?.Dispose();
+
+        animation = null;
+        sourceJson = null;
+
+        OnPropertyChanged(nameof(SourceJson));
+        InvalidateSurface();
+
+        if (string.IsNullOrWhiteSpace(json)) return;
+
+        sourceJson = json;
+
+        OnPropertyChanged(nameof(SourceJson));
+        RebuildAnimation();
     }
 
     private void RebuildAnimation()
@@ -345,6 +428,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             }
 
             using MemoryStream stream = new(Encoding.UTF8.GetBytes(result.Json));
+
             LottieAnimation? rebuiltAnimation = LottieAnimation.Create(stream);
 
             if (rebuiltAnimation is null) throw new InvalidDataException("Skottie could not create an animation from the modified JSON.");
@@ -355,9 +439,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
             animation = rebuiltAnimation;
 
             previousAnimation?.Dispose();
-
             InvalidateSurface();
-
             UpdatePlayback(IsPlaying);
 
             AnimationLoaded?.Invoke(this, EventArgs.Empty);
