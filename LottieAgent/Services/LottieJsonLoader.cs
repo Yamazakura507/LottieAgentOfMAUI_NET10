@@ -6,7 +6,7 @@ namespace LottieAgent.Services;
 /// <summary>
 /// Loads JSON files bundled as MAUI app package assets.
 /// </summary>
-public sealed class MauiLottieJsonLoader : ILottieJsonLoader
+public sealed class LottieJsonLoader : ILottieJsonLoader
 {
     /// <inheritdoc />
     public async ValueTask<string> LoadAsync(string assetPath, CancellationToken cancellationToken = default)

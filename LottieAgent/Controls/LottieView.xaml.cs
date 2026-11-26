@@ -220,7 +220,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
     /// Parameterless constructor used by XAML. It creates the built-in services.
     /// When created through DI, use the constructor accepting service interfaces.
     /// </summary>
-    public LottieView() : this(new MauiLottieJsonLoader(), LottieModifierProcessor.CreateDefault())
+    public LottieView() : this(new LottieJsonLoader(), LottieModifierProcessor.CreateDefault())
     {
 
     }
@@ -288,7 +288,7 @@ public partial class LottieView : SkiaSharp.Views.Maui.Controls.SKCanvasView
     private static void OnJsonLoaderChanged(BindableObject bindable, object oldValue, object newValue)
     {
         LottieView view = (LottieView)bindable;
-        view.jsonLoader = newValue as ILottieJsonLoader ?? new MauiLottieJsonLoader();
+        view.jsonLoader = newValue as ILottieJsonLoader ?? new LottieJsonLoader();
 
         if (!string.IsNullOrWhiteSpace(view.Source)) view.LoadSourceAsync(view.Source);
     }

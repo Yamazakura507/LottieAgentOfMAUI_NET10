@@ -27,7 +27,7 @@ public static class LottieAgentServiceCollectionExtensions
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILottieModifierHandler, TransformModifierHandler>());
         services.TryAddEnumerable(ServiceDescriptor.Singleton<ILottieModifierHandler, RotationModifierHandler>());
 
-        services.TryAddSingleton<ILottieJsonLoader, MauiLottieJsonLoader>();
+        services.TryAddSingleton<ILottieJsonLoader, LottieJsonLoader>();
         services.TryAddSingleton<ILottieModifierProcessor, LottieModifierProcessor>();
 
         services.AddTransient(provider =>
