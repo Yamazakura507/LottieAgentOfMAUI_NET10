@@ -4,6 +4,7 @@ using LottieAnimation = SkiaSharp.Skottie.Animation;
 using SkiaSharp;
 using SkiaSharp.Views.Maui;
 using LottieAgent.Models;
+using LottieAgent.Extensions;
 using LottieAgent.Interfaces;
 using LottieAgent.Services;
 using SkiaSharp.Views.Maui.Controls;
@@ -21,6 +22,7 @@ public partial class LottieView : SKCanvasView
     private ILottieModifierProcessor modifierProcessor;
     private LottieAnimation? animation;
     private string? sourceJson;
+    private double compositionAspectRatio = 1d;
     private bool isTimerRunning;
     private bool isUpdatingInput;
     private int loadVersion;
@@ -370,6 +372,7 @@ public partial class LottieView : SKCanvasView
 
         animation = null;
         sourceJson = null;
+        compositionAspectRatio = 1d;
 
         OnPropertyChanged(nameof(SourceJson));
         InvalidateSurface();
@@ -383,6 +386,7 @@ public partial class LottieView : SKCanvasView
             if (version != loadVersion) return;
 
             sourceJson = json;
+            compositionAspectRatio = json.GetCompositionAspectRatio();
 
             OnPropertyChanged(nameof(SourceJson));
             RebuildAnimation();
@@ -402,6 +406,7 @@ public partial class LottieView : SKCanvasView
 
         animation = null;
         sourceJson = null;
+        compositionAspectRatio = 1d;
 
         OnPropertyChanged(nameof(SourceJson));
         InvalidateSurface();
@@ -409,6 +414,7 @@ public partial class LottieView : SKCanvasView
         if (string.IsNullOrWhiteSpace(json)) return;
 
         sourceJson = json;
+        compositionAspectRatio = json.GetCompositionAspectRatio();
 
         OnPropertyChanged(nameof(SourceJson));
         RebuildAnimation();
